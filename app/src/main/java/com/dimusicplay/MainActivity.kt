@@ -1,6 +1,7 @@
 package com.dimusicplay
 
 import android.Manifest
+import android.app.ActivityOptions
 import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -11,6 +12,7 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.view.View
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
@@ -20,8 +22,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
-// La definición de 'data class Song' ya NO está aquí.
+import com.bumptech.glide.Glide
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nowPlayingArtist: TextView
     private lateinit var playPauseButton: ImageButton
     private lateinit var seekBar: SeekBar
+    private lateinit var nowPlayingAlbumArt: ImageView
 
     private val handler = Handler(Looper.getMainLooper())
     private var runnable: Runnable? = null
@@ -47,9 +49,9 @@ class MainActivity : AppCompatActivity() {
         nowPlayingArtist = findViewById(R.id.nowPlayingArtist)
         playPauseButton = findViewById(R.id.playPauseButton)
         seekBar = findViewById(R.id.seekBar)
+        nowPlayingAlbumArt = findViewById(R.id.nowPlayingAlbumArt)
         
         checkAndRequestPermissions()
-        setupControls()
         
         MusicPlayer.onSongChanged = {
             updateBottomBarUI()
@@ -66,11 +68,19 @@ class MainActivity : AppCompatActivity() {
             controlsContainer.visibility = View.VISIBLE
             nowPlayingTitle.text = song.title
             nowPlayingArtist.text = song.artist
+            
+            Glide.with(this)
+                .load(song.albumArtUri)
+                .placeholder(R.mipmap.ic_launcher)
+                .into(nowPlayingAlbumArt)
+                
             initializeSeekBar()
         }
     }
 
     private fun setupControls() {
+        // Al tocar la barra de controles, abrimos la pantalla Now Playing
+        // PERO NO con una transición, ya que la carátula de la barra no es la misma
         controlsContainer.setOnClickListener {
             val intent = Intent(this, NowPlayingActivity::class.java)
             startActivity(intent)
@@ -116,10 +126,22 @@ class MainActivity : AppCompatActivity() {
         MusicPlayer.setSongList(songs)
         val recyclerView: RecyclerView = findViewById(R.id.songsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        val adapter = SongAdapter(songs) { clickedSong ->
+        
+        val adapter = SongAdapter(songs) { clickedSong, albumArtView ->
             MusicPlayer.playSong(clickedSong)
+            
+            val intent = Intent(this, NowPlayingActivity::class.java)
+            val options = ActivityOptions.makeSceneTransitionAnimation(
+                this,
+                albumArtView,
+                "album_art_transition"
+            )
+            startActivity(intent, options.toBundle())
         }
         recyclerView.adapter = adapter
+        
+        // Llamamos a setupControls aquí, después de que el adapter está listo
+        setupControls()
     }
     
     override fun onDestroy() {
@@ -150,8 +172,6 @@ class MainActivity : AppCompatActivity() {
         val songList = mutableListOf<Song>()
         val projection = arrayOf(MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM_ID)
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
-        
-        // --- ESTA ES LA LÍNEA CORREGIDA ---
         contentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null, MediaStore.Audio.Media.TITLE + " ASC")?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
             val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)

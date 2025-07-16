@@ -12,7 +12,8 @@
         android:id="@+id/albumArtImageView"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:src="@mipmap/ic_launcher"
+        android:transitionName="album_art_transition" />
 
     <LinearLayout
         android:layout_width="0dp"

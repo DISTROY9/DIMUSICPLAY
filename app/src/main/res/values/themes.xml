@@ -8,5 +8,7 @@
         <item name="colorAccent">@color/color_accent</item>
         <item name="android:fontFamily">@font/montserrat_regular</item>
         <item name="fontFamily">@font/montserrat_regular</item>
+        
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 </resources>

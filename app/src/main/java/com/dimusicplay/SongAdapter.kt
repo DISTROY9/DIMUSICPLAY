@@ -10,13 +10,14 @@ import com.bumptech.glide.Glide
 
 class SongAdapter(
     private val songs: List<Song>,
-    private val onItemClicked: (Song) -> Unit
+    // La función ahora recibe la canción Y la vista de la carátula
+    private val onItemClicked: (Song, View) -> Unit 
 ) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
 
     class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleTextView: TextView = itemView.findViewById(R.id.songTitleTextView)
         val artistTextView: TextView = itemView.findViewById(R.id.songArtistTextView)
-        val albumArtImageView: ImageView = itemView.findViewById(R.id.albumArtImageView) // Referencia al ImageView
+        val albumArtImageView: ImageView = itemView.findViewById(R.id.albumArtImageView)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
@@ -33,15 +34,15 @@ class SongAdapter(
         holder.titleTextView.text = song.title
         holder.artistTextView.text = song.artist
 
-        // --- USAMOS GLIDE PARA CARGAR LA IMAGEN ---
         Glide.with(holder.itemView.context)
-            .load(song.albumArtUri) // La URI de la carátula
-            .placeholder(R.mipmap.ic_launcher) // Una imagen de reserva mientras carga
-            .error(R.mipmap.ic_launcher) // Una imagen de reserva si hay un error
-            .into(holder.albumArtImageView) // El ImageView donde se mostrará
+            .load(song.albumArtUri)
+            .placeholder(R.mipmap.ic_launcher)
+            .error(R.mipmap.ic_launcher)
+            .into(holder.albumArtImageView)
 
         holder.itemView.setOnClickListener {
-            onItemClicked(song)
+            // Pasamos la vista de la carátula junto con la canción
+            onItemClicked(song, holder.albumArtImageView)
         }
     }
 }
