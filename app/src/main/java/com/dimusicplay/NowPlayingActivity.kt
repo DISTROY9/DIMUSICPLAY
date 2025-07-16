@@ -9,6 +9,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.gauravk.audiovisualizer.visualizer.BlastVisualizer
 
 class NowPlayingActivity : AppCompatActivity() {
 
@@ -19,9 +20,10 @@ class NowPlayingActivity : AppCompatActivity() {
     private lateinit var playPauseButton: ImageButton
     private lateinit var nextButton: ImageButton
     private lateinit var previousButton: ImageButton
+    private lateinit var blastVisualizer: BlastVisualizer
 
     private val handler = Handler(Looper.getMainLooper())
-    private var runnable: Runnable? = null
+    private var updateSeekBarRunnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,10 +36,11 @@ class NowPlayingActivity : AppCompatActivity() {
         playPauseButton = findViewById(R.id.playPauseButtonLarge)
         nextButton = findViewById(R.id.nextButtonLarge)
         previousButton = findViewById(R.id.previousButtonLarge)
+        blastVisualizer = findViewById(R.id.blastVisualizer)
 
         setupControls()
-
-        // Configuramos un listener para actualizar la UI si la canción cambia
+        
+        // Listener para actualizar la UI si la canción cambia desde la notificación, etc.
         MusicPlayer.onSongChanged = {
             updateUI()
         }
@@ -45,14 +48,20 @@ class NowPlayingActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Cada vez que la pantalla se muestra, actualizamos la UI
+        // Cada vez que la pantalla se muestra, actualizamos la UI y el actualizador del SeekBar
         updateUI()
     }
 
     override fun onPause() {
         super.onPause()
-        // Detenemos el actualizador del seekbar cuando la pantalla no está visible
-        runnable?.let { handler.removeCallbacks(it) }
+        // Detenemos el actualizador del seekbar cuando la pantalla no está visible para ahorrar batería
+        stopSeekBarUpdate()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Liberamos el visualizador para evitar fugas de memoria
+        blastVisualizer.release()
     }
 
     private fun updateUI() {
@@ -65,6 +74,15 @@ class NowPlayingActivity : AppCompatActivity() {
                 .error(R.mipmap.ic_launcher)
                 .into(albumArtImageView)
             
+            // Conectamos el visualizador a la sesión de audio del MediaPlayer
+            MusicPlayer.mediaPlayer?.let {
+                try {
+                    blastVisualizer.setAudioSessionId(it.audioSessionId)
+                } catch (e: Exception) {
+                    // Ignorar si hay un error al enlazar el visualizador
+                }
+            }
+            
             initializeSeekBar()
         }
     }
@@ -72,6 +90,7 @@ class NowPlayingActivity : AppCompatActivity() {
     private fun setupControls() {
         playPauseButton.setOnClickListener {
             MusicPlayer.pauseOrResume()
+            updatePlayPauseButton()
         }
         nextButton.setOnClickListener {
             MusicPlayer.playNextSong()
@@ -87,21 +106,37 @@ class NowPlayingActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(p0: SeekBar?) {}
         })
     }
+    
+    private fun updatePlayPauseButton() {
+        MusicPlayer.mediaPlayer?.let {
+            if (it.isPlaying) {
+                 playPauseButton.setImageResource(R.drawable.ic_pause)
+            } else {
+                 playPauseButton.setImageResource(R.drawable.ic_play)
+            }
+        }
+    }
 
     private fun initializeSeekBar() {
-        seekBar.max = MusicPlayer.mediaPlayer?.duration ?: 0
-        runnable?.let { handler.removeCallbacks(it) }
-        runnable = Runnable {
-            MusicPlayer.mediaPlayer?.let {
-                if (it.isPlaying) {
-                     playPauseButton.setImageResource(R.drawable.ic_pause)
-                } else {
-                     playPauseButton.setImageResource(R.drawable.ic_play)
-                }
-                seekBar.progress = it.currentPosition
-            }
-            handler.postDelayed(runnable!!, 1000)
+        MusicPlayer.mediaPlayer?.let {
+            seekBar.max = it.duration
+            startSeekBarUpdate()
         }
-        handler.postDelayed(runnable!!, 1000)
+    }
+
+    private fun startSeekBarUpdate() {
+        stopSeekBarUpdate() // Detenemos cualquier actualizador anterior
+        updateSeekBarRunnable = Runnable {
+            MusicPlayer.mediaPlayer?.let {
+                seekBar.progress = it.currentPosition
+                updatePlayPauseButton() // Actualizamos el botón de play/pausa
+            }
+            handler.postDelayed(updateSeekBarRunnable!!, 1000)
+        }
+        handler.postDelayed(updateSeekBarRunnable!!, 1000)
+    }
+
+    private fun stopSeekBarUpdate() {
+        updateSeekBarRunnable?.let { handler.removeCallbacks(it) }
     }
 }

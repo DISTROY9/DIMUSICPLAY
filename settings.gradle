@@ -1,19 +1,11 @@
-pluginManagement {
-  repositories {
-    gradlePluginPortal()
-    google()
-    mavenCentral()
-  }
-}
-
 dependencyResolutionManagement {
-  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-  repositories {
-    google()
-    mavenCentral()
-  }
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        // Añadimos esta línea para que pueda encontrar la librería
+        maven { url 'https://jitpack.io' }
+    }
 }
-
-rootProject.name = "DimusicPlay"
-
-include(":app")
+rootProject.name = "DIMUSICPLAY"
+include ':app'
