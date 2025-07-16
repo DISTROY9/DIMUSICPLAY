@@ -1,9 +1,13 @@
 package com.dimusicplay
 
+import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.MediaPlayer
+import android.os.Build
 import java.io.IOException
 
-// Un 'object' en Kotlin es un Singleton: solo existirá una instancia de él en toda la app.
 object MusicPlayer {
 
     var mediaPlayer: MediaPlayer? = null
@@ -13,11 +17,70 @@ object MusicPlayer {
     
     var onSongChanged: (() -> Unit)? = null
 
+    private var audioManager: AudioManager? = null
+    private var audioFocusRequest: AudioFocusRequest? = null
+    private var onAudioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                mediaPlayer?.start()
+                onSongChanged?.invoke()
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                if (mediaPlayer?.isPlaying == true) {
+                    mediaPlayer?.pause()
+                    onSongChanged?.invoke()
+                }
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                mediaPlayer?.stop()
+                release()
+                onSongChanged?.invoke()
+            }
+        }
+    }
+
+    fun initialize(context: Context) {
+        audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    }
+
+    private fun requestAudioFocus(): Boolean {
+        val result: Int
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+                setAudioAttributes(AudioAttributes.Builder().run {
+                    setUsage(AudioAttributes.USAGE_MEDIA)
+                    setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    build()
+                })
+                setOnAudioFocusChangeListener(onAudioFocusChangeListener)
+                build()
+            }
+            result = audioManager?.requestAudioFocus(audioFocusRequest!!) ?: AudioManager.AUDIOFOCUS_REQUEST_FAILED
+        } else {
+            @Suppress("DEPRECATION")
+            result = audioManager?.requestAudioFocus(onAudioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN) ?: AudioManager.AUDIOFOCUS_REQUEST_FAILED
+        }
+        return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+    }
+    
+    private fun abandonAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioFocusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager?.abandonAudioFocus(onAudioFocusChangeListener)
+        }
+    }
+
     fun setSongList(songList: List<Song>) {
         this.songs = songList
     }
 
     fun playSong(song: Song) {
+        if (!requestAudioFocus()) {
+            return
+        }
+
         currentSong = song
         currentSongIndex = songs.indexOf(song)
         
@@ -26,11 +89,12 @@ object MusicPlayer {
         mediaPlayer = MediaPlayer().apply {
             try {
                 setDataSource(song.path)
-                prepareAsync()
                 setOnPreparedListener {
                     it.start()
+                    // Notificamos a la UI que la canción ha cambiado y está lista
                     onSongChanged?.invoke()
                 }
+                prepareAsync()
                 setOnCompletionListener {
                     playNextSong()
                 }
@@ -61,6 +125,8 @@ object MusicPlayer {
             } else {
                 it.start()
             }
+            // Notificamos a la UI para que actualice el botón de play/pausa
+            onSongChanged?.invoke()
         }
     }
     
@@ -68,5 +134,6 @@ object MusicPlayer {
         mediaPlayer?.release()
         mediaPlayer = null
         currentSong = null
+        abandonAudioFocus()
     }
 }

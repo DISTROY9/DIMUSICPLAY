@@ -23,7 +23,7 @@ class NowPlayingActivity : AppCompatActivity() {
     private lateinit var blastVisualizer: BlastVisualizer
 
     private val handler = Handler(Looper.getMainLooper())
-    private var updateSeekBarRunnable: Runnable? = null
+    private var runnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +39,8 @@ class NowPlayingActivity : AppCompatActivity() {
         blastVisualizer = findViewById(R.id.blastVisualizer)
 
         setupControls()
-        
-        // Listener para actualizar la UI si la canción cambia desde la notificación, etc.
+
+        // Configuramos un listener para actualizar la UI si la canción cambia
         MusicPlayer.onSongChanged = {
             updateUI()
         }
@@ -54,7 +54,7 @@ class NowPlayingActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        // Detenemos el actualizador del seekbar cuando la pantalla no está visible para ahorrar batería
+        // Detenemos el actualizador del seekbar cuando la pantalla no está visible
         stopSeekBarUpdate()
     }
 
@@ -74,10 +74,11 @@ class NowPlayingActivity : AppCompatActivity() {
                 .error(R.mipmap.ic_launcher)
                 .into(albumArtImageView)
             
-            // Conectamos el visualizador a la sesión de audio del MediaPlayer
             MusicPlayer.mediaPlayer?.let {
                 try {
-                    blastVisualizer.setAudioSessionId(it.audioSessionId)
+                    if (it.isPlaying) {
+                         blastVisualizer.setAudioSessionId(it.audioSessionId)
+                    }
                 } catch (e: Exception) {
                     // Ignorar si hay un error al enlazar el visualizador
                 }
@@ -90,7 +91,6 @@ class NowPlayingActivity : AppCompatActivity() {
     private fun setupControls() {
         playPauseButton.setOnClickListener {
             MusicPlayer.pauseOrResume()
-            updatePlayPauseButton()
         }
         nextButton.setOnClickListener {
             MusicPlayer.playNextSong()
@@ -126,17 +126,17 @@ class NowPlayingActivity : AppCompatActivity() {
 
     private fun startSeekBarUpdate() {
         stopSeekBarUpdate() // Detenemos cualquier actualizador anterior
-        updateSeekBarRunnable = Runnable {
+        runnable = Runnable {
             MusicPlayer.mediaPlayer?.let {
                 seekBar.progress = it.currentPosition
                 updatePlayPauseButton() // Actualizamos el botón de play/pausa
             }
-            handler.postDelayed(updateSeekBarRunnable!!, 1000)
+            handler.postDelayed(runnable!!, 1000)
         }
-        handler.postDelayed(updateSeekBarRunnable!!, 1000)
+        handler.postDelayed(runnable!!, 1000)
     }
 
     private fun stopSeekBarUpdate() {
-        updateSeekBarRunnable?.let { handler.removeCallbacks(it) }
+        runnable?.let { handler.removeCallbacks(it) }
     }
 }

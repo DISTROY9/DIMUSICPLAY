@@ -38,10 +38,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nowPlayingAlbumArt: ImageView
 
     private val handler = Handler(Looper.getMainLooper())
-    private var runnable: Runnable? = null
+    private lateinit var seekBarUpdateRunnable: Runnable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MusicPlayer.initialize(applicationContext)
         setContentView(R.layout.activity_main)
 
         controlsContainer = findViewById(R.id.controlsContainer)
@@ -51,7 +52,9 @@ class MainActivity : AppCompatActivity() {
         seekBar = findViewById(R.id.seekBar)
         nowPlayingAlbumArt = findViewById(R.id.nowPlayingAlbumArt)
         
+        setupSeekBarUpdater()
         checkAndRequestPermissions()
+        setupControls()
         
         MusicPlayer.onSongChanged = {
             updateBottomBarUI()
@@ -63,24 +66,35 @@ class MainActivity : AppCompatActivity() {
         updateBottomBarUI()
     }
     
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacks(seekBarUpdateRunnable)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        MusicPlayer.release()
+        handler.removeCallbacks(seekBarUpdateRunnable)
+    }
+    
     private fun updateBottomBarUI() {
-        MusicPlayer.currentSong?.let { song ->
+        if (MusicPlayer.currentSong != null) {
             controlsContainer.visibility = View.VISIBLE
-            nowPlayingTitle.text = song.title
-            nowPlayingArtist.text = song.artist
+            nowPlayingTitle.text = MusicPlayer.currentSong!!.title
+            nowPlayingArtist.text = MusicPlayer.currentSong!!.artist
             
             Glide.with(this)
-                .load(song.albumArtUri)
+                .load(MusicPlayer.currentSong!!.albumArtUri)
                 .placeholder(R.mipmap.ic_launcher)
                 .into(nowPlayingAlbumArt)
                 
             initializeSeekBar()
+        } else {
+            controlsContainer.visibility = View.GONE
         }
     }
 
     private fun setupControls() {
-        // Al tocar la barra de controles, abrimos la pantalla Now Playing
-        // PERO NO con una transición, ya que la carátula de la barra no es la misma
         controlsContainer.setOnClickListener {
             val intent = Intent(this, NowPlayingActivity::class.java)
             startActivity(intent)
@@ -103,22 +117,26 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun initializeSeekBar() {
-        MusicPlayer.mediaPlayer?.let {
-            seekBar.max = it.duration
+        MusicPlayer.mediaPlayer?.let { player ->
+            seekBar.max = player.duration
+            handler.post(seekBarUpdateRunnable)
         }
-        runnable?.let { handler.removeCallbacks(it) }
-        runnable = Runnable {
-            MusicPlayer.mediaPlayer?.let {
-                if (it.isPlaying) {
+    }
+
+    private fun setupSeekBarUpdater() {
+        seekBarUpdateRunnable = Runnable {
+            MusicPlayer.mediaPlayer?.let { player ->
+                if (isDestroyed) return@Runnable // Previene crash si la actividad se destruye
+                seekBar.progress = player.currentPosition
+                if (player.isPlaying) {
                      playPauseButton.setImageResource(R.drawable.ic_pause)
                 } else {
                      playPauseButton.setImageResource(R.drawable.ic_play)
                 }
-                seekBar.progress = it.currentPosition
+                // Vuelve a ejecutar este código después de 1 segundo
+                handler.postDelayed(seekBarUpdateRunnable, 1000)
             }
-            handler.postDelayed(runnable!!, 1000)
         }
-        handler.postDelayed(runnable!!, 1000)
     }
 
     private fun loadSongs() {
@@ -139,14 +157,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent, options.toBundle())
         }
         recyclerView.adapter = adapter
-        
-        // Llamamos a setupControls aquí, después de que el adapter está listo
-        setupControls()
-    }
-    
-    override fun onDestroy() {
-        super.onDestroy()
-        runnable?.let { handler.removeCallbacks(it) }
     }
     
     private fun checkAndRequestPermissions() {

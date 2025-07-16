@@ -1,0 +1,50 @@
+{
+  "allFiles": [
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/MusicPlayer.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 4483,
+          "line": 139
+        },
+        "start": {
+          "column": 0,
+          "index": 4483,
+          "line": 139
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/MainActivity.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 8276,
+          "line": 205
+        },
+        "start": {
+          "column": 0,
+          "index": 8276,
+          "line": 205
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/NowPlayingActivity.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 4824,
+          "line": 142
+        },
+        "start": {
+          "column": 0,
+          "index": 4824,
+          "line": 142
+        }
+      }
+    }
+  ],
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/MainActivity.kt"
+}
