@@ -9,9 +9,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 // --- Molde para nuestras canciones ---
-// Lo definimos fuera de la clase principal para que sea accesible
 data class Song(
     val id: Long,
     val title: String,
@@ -41,8 +42,8 @@ class MainActivity : AppCompatActivity() {
             // Si no está concedido, lo solicitamos
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_AUDIO), PERMISSION_REQUEST_CODE)
         } else {
-            // Si el permiso ya fue concedido, procedemos a escanear la música
-            Toast.makeText(this, "Permiso concedido. Escaneando música...", Toast.LENGTH_SHORT).show()
+            // Si el permiso ya fue concedido, procedemos a cargar las canciones
+            Toast.makeText(this, "Permiso concedido. Cargando música...", Toast.LENGTH_SHORT).show()
             loadSongs()
         }
     }
@@ -54,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // El usuario concedió el permiso
-                Toast.makeText(this, "¡Permiso concedido! Escaneando música...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "¡Permiso concedido! Cargando música...", Toast.LENGTH_SHORT).show()
                 loadSongs()
             } else {
                 // El usuario denegó el permiso
@@ -63,17 +64,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Nueva función que encapsula la lógica de escaneo
+    // Función que escanea la música y configura el RecyclerView
     private fun loadSongs() {
         val songs = scanForMusic()
-        // Usamos Log.d para depurar. 'd' es de debug.
-        // El primer parámetro es una "etiqueta" para filtrar, el segundo es el mensaje.
         Log.d("DIMUSICPLAY_DEBUG", "Canciones encontradas: ${songs.size}")
-        
-        // Opcional: Imprime los detalles de las primeras 5 canciones para verificar
-        songs.take(5).forEach { song ->
-            Log.d("DIMUSICPLAY_DEBUG", "Canción: ${song.title}, Artista: ${song.artist}")
-        }
+
+        // 1. Encontramos el RecyclerView en nuestro layout por su ID
+        val recyclerView: RecyclerView = findViewById(R.id.songsRecyclerView)
+
+        // 2. Le decimos cómo mostrar los elementos (en una lista vertical)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // 3. Creamos nuestro adaptador con la lista de canciones
+        val adapter = SongAdapter(songs)
+
+        // 4. Conectamos el RecyclerView con nuestro adaptador para que muestre los datos
+        recyclerView.adapter = adapter
     }
 
     private fun scanForMusic(): List<Song> {
@@ -88,7 +94,7 @@ class MainActivity : AppCompatActivity() {
             MediaStore.Audio.Media.DATA // La ruta del archivo
         )
         
-        // Le decimos que solo queremos archivos de música (y no notificaciones, etc.)
+        // Le decimos que solo queremos archivos de música
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
         
         // Hacemos la consulta al MediaStore
@@ -97,18 +103,18 @@ class MainActivity : AppCompatActivity() {
             projection,
             selection,
             null,
-            MediaStore.Audio.Media.TITLE + " ASC" // Ordenamos las canciones alfabéticamente por título
+            MediaStore.Audio.Media.TITLE + " ASC" // Ordenamos las canciones alfabéticamente
         )
         
         cursor?.use { c ->
-            // Obtenemos los índices de las columnas que nos interesan para no buscarlos en cada iteración
+            // Obtenemos los índices de las columnas
             val idColumn = c.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
             val titleColumn = c.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
             val artistColumn = c.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
             val durationColumn = c.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
             val pathColumn = c.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
             
-            // Recorremos todos los resultados (cada canción)
+            // Recorremos todos los resultados
             while (c.moveToNext()) {
                 val id = c.getLong(idColumn)
                 val title = c.getString(titleColumn)
