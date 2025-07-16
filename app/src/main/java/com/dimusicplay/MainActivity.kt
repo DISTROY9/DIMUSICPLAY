@@ -1,8 +1,10 @@
 package com.dimusicplay
 
 import android.Manifest
+import android.content.ContentUris
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -19,12 +21,14 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
+// El molde ahora incluye el campo para la carátula del álbum
 data class Song(
     val id: Long,
     val title: String,
     val artist: String,
     val duration: Long,
-    val path: String
+    val path: String,
+    val albumArtUri: Uri
 )
 
 class MainActivity : AppCompatActivity() {
@@ -106,23 +110,19 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer = MediaPlayer().apply {
             try {
                 setDataSource(song.path)
-                // Usamos prepareAsync() que es más seguro y no bloquea la app
                 setOnPreparedListener { mp ->
-                    // La música está lista para sonar, ahora la iniciamos
                     mp.start()
-                    initializeSeekBar() // Movemos la inicialización del SeekBar aquí
+                    initializeSeekBar()
                 }
-                prepareAsync() // Prepara la reproducción en segundo plano
+                prepareAsync()
             } catch (e: Exception) {
                 Toast.makeText(this@MainActivity, "Error al reproducir la canción.", Toast.LENGTH_SHORT).show()
                 e.printStackTrace()
             }
-
             setOnCompletionListener {
                 playNextSong()
             }
         }
-        
         setupControls()
     }
     
@@ -150,10 +150,8 @@ class MainActivity : AppCompatActivity() {
                 playPauseButton.setImageResource(R.drawable.ic_pause)
             }
         }
-        
         nextButton.setOnClickListener { playNextSong() }
         previousButton.setOnClickListener { playPreviousSong() }
-
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) mediaPlayer?.seekTo(progress)
@@ -171,7 +169,7 @@ class MainActivity : AppCompatActivity() {
                 seekBar.progress = mediaPlayer?.currentPosition ?: 0
                 handler.postDelayed(runnable!!, 1000)
             } catch (e: Exception) {
-                // Evita crashes si el mediaplayer se libera mientras el runnable está activo
+                // Evita crashes
             }
         }
         handler.postDelayed(runnable!!, 1000)
@@ -186,16 +184,48 @@ class MainActivity : AppCompatActivity() {
 
     private fun scanForMusic(): List<Song> {
         val songList = mutableListOf<Song>()
-        val projection = arrayOf(MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.DATA)
+        
+        // Añadimos ALBUM_ID para poder obtener la carátula
+        val projection = arrayOf(
+            MediaStore.Audio.Media._ID,
+            MediaStore.Audio.Media.TITLE,
+            MediaStore.Audio.Media.ARTIST,
+            MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media.DATA,
+            MediaStore.Audio.Media.ALBUM_ID
+        )
+        
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
-        contentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null, MediaStore.Audio.Media.TITLE + " ASC")?.use { cursor ->
+        
+        contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            null,
+            MediaStore.Audio.Media.TITLE + " ASC"
+        )?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
             val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
             val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
             val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
             val pathColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+            val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
+            
             while (cursor.moveToNext()) {
-                songList.add(Song(cursor.getLong(idColumn), cursor.getString(titleColumn), cursor.getString(artistColumn), cursor.getLong(durationColumn), cursor.getString(pathColumn)))
+                val id = cursor.getLong(idColumn)
+                val title = cursor.getString(titleColumn)
+                val artist = cursor.getString(artistColumn)
+                val duration = cursor.getLong(durationColumn)
+                val path = cursor.getString(pathColumn)
+                val albumId = cursor.getLong(albumIdColumn)
+                
+                // Construimos la URI para la carátula del álbum
+                val albumArtUri = ContentUris.withAppendedId(
+                    Uri.parse("content://media/external/audio/albumart"),
+                    albumId
+                )
+                
+                songList.add(Song(id, title, artist, duration, path, albumArtUri))
             }
         }
         return songList
