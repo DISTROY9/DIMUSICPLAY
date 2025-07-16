@@ -35,27 +35,30 @@ class MainActivity : AppCompatActivity() {
 
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var songs: List<Song>
+    private var currentSongIndex = -1
 
     // Variables para los controles de UI
     private lateinit var controlsContainer: CardView
     private lateinit var nowPlayingTitle: TextView
     private lateinit var nowPlayingArtist: TextView
     private lateinit var playPauseButton: ImageButton
+    private lateinit var nextButton: ImageButton
+    private lateinit var previousButton: ImageButton
     private lateinit var seekBar: SeekBar
     
-    // Handler para actualizar la UI (el SeekBar) cada segundo
     private val handler = Handler(Looper.getMainLooper())
-    private lateinit var runnable: Runnable
+    private var runnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Inicializamos las vistas de los controles
         controlsContainer = findViewById(R.id.controlsContainer)
         nowPlayingTitle = findViewById(R.id.nowPlayingTitle)
         nowPlayingArtist = findViewById(R.id.nowPlayingArtist)
         playPauseButton = findViewById(R.id.playPauseButton)
+        nextButton = findViewById(R.id.nextButton)
+        previousButton = findViewById(R.id.previousButton)
         seekBar = findViewById(R.id.seekBar)
 
         checkAndRequestPermissions()
@@ -84,8 +87,9 @@ class MainActivity : AppCompatActivity() {
         songs = scanForMusic()
         val recyclerView: RecyclerView = findViewById(R.id.songsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        val adapter = SongAdapter(songs) { song ->
-            playSong(song)
+        val adapter = SongAdapter(songs) { clickedSong ->
+            currentSongIndex = songs.indexOf(clickedSong)
+            playSong(clickedSong)
         }
         recyclerView.adapter = adapter
     }
@@ -93,22 +97,47 @@ class MainActivity : AppCompatActivity() {
     private fun playSong(song: Song) {
         mediaPlayer?.stop()
         mediaPlayer?.release()
-        mediaPlayer = null
         
-        // Hacemos visible el panel de controles
         controlsContainer.visibility = View.VISIBLE
         nowPlayingTitle.text = song.title
         nowPlayingArtist.text = song.artist
-        playPauseButton.setImageResource(R.drawable.ic_pause) // Cambiamos el icono a "pausa"
+        playPauseButton.setImageResource(R.drawable.ic_pause)
 
         mediaPlayer = MediaPlayer().apply {
-            setDataSource(song.path)
-            prepare()
-            start()
+            try {
+                setDataSource(song.path)
+                // Usamos prepareAsync() que es más seguro y no bloquea la app
+                setOnPreparedListener { mp ->
+                    // La música está lista para sonar, ahora la iniciamos
+                    mp.start()
+                    initializeSeekBar() // Movemos la inicialización del SeekBar aquí
+                }
+                prepareAsync() // Prepara la reproducción en segundo plano
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, "Error al reproducir la canción.", Toast.LENGTH_SHORT).show()
+                e.printStackTrace()
+            }
+
+            setOnCompletionListener {
+                playNextSong()
+            }
         }
         
         setupControls()
-        initializeSeekBar()
+    }
+    
+    private fun playNextSong() {
+        if (songs.isNotEmpty()) {
+            currentSongIndex = (currentSongIndex + 1) % songs.size
+            playSong(songs[currentSongIndex])
+        }
+    }
+
+    private fun playPreviousSong() {
+        if (songs.isNotEmpty()) {
+            currentSongIndex = if (currentSongIndex - 1 < 0) songs.size - 1 else currentSongIndex - 1
+            playSong(songs[currentSongIndex])
+        }
     }
     
     private fun setupControls() {
@@ -121,12 +150,13 @@ class MainActivity : AppCompatActivity() {
                 playPauseButton.setImageResource(R.drawable.ic_pause)
             }
         }
+        
+        nextButton.setOnClickListener { playNextSong() }
+        previousButton.setOnClickListener { playPreviousSong() }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    mediaPlayer?.seekTo(progress)
-                }
+                if (fromUser) mediaPlayer?.seekTo(progress)
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
@@ -135,23 +165,26 @@ class MainActivity : AppCompatActivity() {
 
     private fun initializeSeekBar() {
         seekBar.max = mediaPlayer?.duration ?: 0
-        
+        runnable?.let { handler.removeCallbacks(it) }
         runnable = Runnable {
-            seekBar.progress = mediaPlayer?.currentPosition ?: 0
-            handler.postDelayed(runnable, 1000) // Se actualiza cada segundo
+            try {
+                seekBar.progress = mediaPlayer?.currentPosition ?: 0
+                handler.postDelayed(runnable!!, 1000)
+            } catch (e: Exception) {
+                // Evita crashes si el mediaplayer se libera mientras el runnable está activo
+            }
         }
-        handler.postDelayed(runnable, 1000)
+        handler.postDelayed(runnable!!, 1000)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         mediaPlayer?.release()
         mediaPlayer = null
-        handler.removeCallbacks(runnable) // Detenemos el actualizador del seekbar
+        runnable?.let { handler.removeCallbacks(it) }
     }
 
     private fun scanForMusic(): List<Song> {
-        // El código de esta función no cambia, es el mismo que ya tienes
         val songList = mutableListOf<Song>()
         val projection = arrayOf(MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.DATA)
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
