@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="8dp"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:background="@color/dark_background">
 
     <ImageView
         android:id="@+id/albumArtImageView"
@@ -25,8 +26,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textColor="@android:color/black"
+            android:textColor="@color/dark_primary_text"
             android:text="Título de la Canción"
+            android:fontFamily="@font/russo_one_regular"
             android:maxLines="1"
             android:ellipsize="end"/>
 
@@ -35,10 +37,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/dark_secondary_text"
             android:text="Artista"
             android:maxLines="1"
             android:ellipsize="end"/>
     </LinearLayout>
-
 </LinearLayout>
