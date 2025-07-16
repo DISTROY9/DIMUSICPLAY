@@ -2,6 +2,7 @@ package com.dimusicplay
 
 import android.Manifest
 import android.content.ContentUris
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -21,7 +22,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-// El molde ahora incluye el campo para la carátula del álbum
 data class Song(
     val id: Long,
     val title: String,
@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var songs: List<Song>
     private var currentSongIndex = -1
 
-    // Variables para los controles de UI
     private lateinit var controlsContainer: CardView
     private lateinit var nowPlayingTitle: TextView
     private lateinit var nowPlayingArtist: TextView
@@ -66,8 +65,9 @@ class MainActivity : AppCompatActivity() {
         seekBar = findViewById(R.id.seekBar)
 
         checkAndRequestPermissions()
+        setupControls()
     }
-
+    
     private fun checkAndRequestPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_AUDIO), PERMISSION_REQUEST_CODE)
@@ -116,31 +116,32 @@ class MainActivity : AppCompatActivity() {
                 }
                 prepareAsync()
             } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, "Error al reproducir la canción.", Toast.LENGTH_SHORT).show()
                 e.printStackTrace()
             }
-            setOnCompletionListener {
-                playNextSong()
-            }
+            setOnCompletionListener { playNextSong() }
         }
-        setupControls()
     }
     
     private fun playNextSong() {
-        if (songs.isNotEmpty()) {
+        if (::songs.isInitialized && songs.isNotEmpty()) {
             currentSongIndex = (currentSongIndex + 1) % songs.size
             playSong(songs[currentSongIndex])
         }
     }
 
     private fun playPreviousSong() {
-        if (songs.isNotEmpty()) {
+        if (::songs.isInitialized && songs.isNotEmpty()) {
             currentSongIndex = if (currentSongIndex - 1 < 0) songs.size - 1 else currentSongIndex - 1
             playSong(songs[currentSongIndex])
         }
     }
     
     private fun setupControls() {
+        controlsContainer.setOnClickListener {
+            val intent = Intent(this, NowPlayingActivity::class.java)
+            startActivity(intent)
+        }
+
         playPauseButton.setOnClickListener {
             if (mediaPlayer?.isPlaying == true) {
                 mediaPlayer?.pause()
@@ -150,17 +151,28 @@ class MainActivity : AppCompatActivity() {
                 playPauseButton.setImageResource(R.drawable.ic_pause)
             }
         }
+        
         nextButton.setOnClickListener { playNextSong() }
         previousButton.setOnClickListener { playPreviousSong() }
+        
+        // --- ESTE ES EL BLOQUE CORREGIDO Y COMPLETO ---
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) mediaPlayer?.seekTo(progress)
+                if (fromUser) {
+                    mediaPlayer?.seekTo(progress)
+                }
             }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                // No necesitamos hacer nada aquí
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                // No necesitamos hacer nada aquí
+            }
         })
     }
-
+    
     private fun initializeSeekBar() {
         seekBar.max = mediaPlayer?.duration ?: 0
         runnable?.let { handler.removeCallbacks(it) }
@@ -174,7 +186,7 @@ class MainActivity : AppCompatActivity() {
         }
         handler.postDelayed(runnable!!, 1000)
     }
-
+    
     override fun onDestroy() {
         super.onDestroy()
         mediaPlayer?.release()
@@ -184,33 +196,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun scanForMusic(): List<Song> {
         val songList = mutableListOf<Song>()
-        
-        // Añadimos ALBUM_ID para poder obtener la carátula
-        val projection = arrayOf(
-            MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.TITLE,
-            MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.ALBUM_ID
-        )
-        
+        val projection = arrayOf(MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM_ID)
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
-        
-        contentResolver.query(
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            selection,
-            null,
-            MediaStore.Audio.Media.TITLE + " ASC"
-        )?.use { cursor ->
+        contentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null, MediaStore.Audio.Media.TITLE + " ASC")?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
             val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
             val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
             val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
             val pathColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
             val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
-            
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
                 val title = cursor.getString(titleColumn)
@@ -218,13 +212,7 @@ class MainActivity : AppCompatActivity() {
                 val duration = cursor.getLong(durationColumn)
                 val path = cursor.getString(pathColumn)
                 val albumId = cursor.getLong(albumIdColumn)
-                
-                // Construimos la URI para la carátula del álbum
-                val albumArtUri = ContentUris.withAppendedId(
-                    Uri.parse("content://media/external/audio/albumart"),
-                    albumId
-                )
-                
+                val albumArtUri = ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), albumId)
                 songList.add(Song(id, title, artist, duration, path, albumArtUri))
             }
         }
