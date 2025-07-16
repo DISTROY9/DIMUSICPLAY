@@ -1,47 +1,17 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/res/layout/activity_now_playing.xml",
+      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/MusicPlayer.kt",
       "selection": {
         "end": {
           "column": 0,
-          "index": 3750,
-          "line": 94
+          "index": 1858,
+          "line": 72
         },
         "start": {
           "column": 0,
-          "index": 3750,
-          "line": 94
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/NowPlayingActivity.kt",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 465,
-          "line": 14
-        },
-        "start": {
-          "column": 0,
-          "index": 465,
-          "line": 14
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/AndroidManifest.xml",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 893,
-          "line": 25
-        },
-        "start": {
-          "column": 0,
-          "index": 893,
-          "line": 25
+          "index": 1858,
+          "line": 72
         }
       }
     },
@@ -50,13 +20,43 @@
       "selection": {
         "end": {
           "column": 0,
-          "index": 8486,
-          "line": 221
+          "index": 7043,
+          "line": 175
         },
         "start": {
           "column": 0,
-          "index": 8486,
-          "line": 221
+          "index": 7043,
+          "line": 175
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/NowPlayingActivity.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 3726,
+          "line": 107
+        },
+        "start": {
+          "column": 0,
+          "index": 3726,
+          "line": 107
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/Song.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 285,
+          "line": 13
+        },
+        "start": {
+          "column": 0,
+          "index": 285,
+          "line": 13
         }
       }
     }
