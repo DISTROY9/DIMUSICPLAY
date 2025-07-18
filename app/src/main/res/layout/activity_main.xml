@@ -1,117 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     xmlns:tools="http://schemas.android.com/tools"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:background="@color/black"
+     tools:context=".MainActivity">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/songsRecyclerView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/controlsContainer"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-        
-    <androidx.cardview.widget.CardView
-        android:id="@+id/controlsContainer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/dark_surface"
-        app:cardElevation="8dp"
-        android:visibility="gone"
-        tools:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+    <LinearLayout
+         android:layout_height="?attr/actionBarSize"
+         android:layout_width="0dp"
+         android:paddingEnd="16dp"
+         android:background="#1A1A1A"
+         android:gravity="center_vertical"
+         app:layout_constraintTop_toTopOf="parent"
+         android:orientation="horizontal"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         android:paddingStart="16dp"
+         android:id="@+id/topBar">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp">
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="0dp"
+             android:textSize="24sp"
+             android:textColor="@color/white"
+             android:layout_weight="1"
+             android:text="DIMUSIC PLAY"
+             android:textStyle="bold" />
 
-            <ImageView
-                android:id="@+id/nowPlayingAlbumArt"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@mipmap/ic_launcher"
-                android:scaleType="centerCrop"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/seekBar"/>
+        <ImageView
+             android:layout_height="24dp"
+             android:layout_width="24dp"
+             android:src="@android:drawable/ic_menu_search"
+             android:contentDescription="Search"
+             app:tint="@color/white" />
+
+    </LinearLayout>
+
+    <FrameLayout
+         android:layout_height="0dp"
+         android:layout_width="0dp"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+         app:layout_constraintTop_toBottomOf="@+id/topBar"
+         android:id="@+id/main_content_frame">
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:textSize="20sp"
+             android:textColor="#CCCCCC"
+             android:layout_gravity="center"
+             android:text="¡Tu Música Futurista Aquí!" />
+
+    </FrameLayout>
+
+    <LinearLayout
+         android:layout_height="60dp"
+         android:layout_width="0dp"
+         android:paddingEnd="16dp"
+         android:background="#2C2C2C"
+         android:gravity="center_vertical"
+         android:orientation="horizontal"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         android:paddingStart="16dp"
+         app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+         android:id="@+id/miniPlayerBar">
+
+        <ImageView
+             android:layout_height="40dp"
+             android:layout_width="40dp"
+             android:src="@drawable/ic_launcher_background"
+             android:contentDescription="Album Art"
+             android:id="@+id/miniPlayerAlbumArt" />
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="0dp"
+             android:orientation="vertical"
+             android:layout_marginStart="12dp"
+             android:layout_weight="1">
 
             <TextView
-                android:id="@+id/nowPlayingTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Título"
-                android:textColor="@color/dark_primary_text"
-                android:textSize="14sp"
-                android:fontFamily="@font/russo_one_regular"
-                android:layout_marginStart="8dp"
-                app:layout_constraintTop_toTopOf="@id/nowPlayingAlbumArt"
-                app:layout_constraintStart_toEndOf="@id/nowPlayingAlbumArt"
-                app:layout_constraintEnd_toStartOf="@+id/previousButton" />
-            
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:ellipsize="end"
+                 android:textSize="16sp"
+                 android:textColor="@color/white"
+                 android:maxLines="1"
+                 android:id="@+id/miniPlayerSongTitle"
+                 android:text="Nombre de la Canción"
+                 android:textStyle="bold" />
+
             <TextView
-                android:id="@+id/nowPlayingArtist"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Artista"
-                android:textColor="@color/dark_secondary_text"
-                android:textSize="12sp"
-                app:layout_constraintTop_toBottomOf="@id/nowPlayingTitle"
-                app:layout_constraintStart_toStartOf="@id/nowPlayingTitle"
-                app:layout_constraintEnd_toEndOf="@id/nowPlayingTitle" />
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:ellipsize="end"
+                 android:textSize="14sp"
+                 android:textColor="#AAAAAA"
+                 android:maxLines="1"
+                 android:id="@+id/miniPlayerArtist"
+                 android:text="Nombre del Artista" />
 
-            <ImageButton
-                android:id="@+id/previousButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_previous"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@color/dark_primary_text"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="@id/nowPlayingArtist"
-                app:layout_constraintEnd_toStartOf="@+id/playPauseButton" />
+        </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/playPauseButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_play"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@color/dark_primary_text"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="@id/nowPlayingArtist"
-                app:layout_constraintEnd_toStartOf="@+id/nextButton" />
+        <ImageView
+             android:layout_height="36dp"
+             android:layout_width="36dp"
+             android:src="@android:drawable/ic_media_play"
+             android:contentDescription="Play/Pause"
+             android:background="?attr/selectableItemBackgroundBorderless"
+             android:clickable="true"
+             app:tint="@color/white"
+             android:focusable="true"
+             android:id="@+id/miniPlayerPlayPause" />
 
-            <ImageButton
-                android:id="@+id/nextButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_next"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@color/dark_primary_text"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="@id/nowPlayingArtist"
-                app:layout_constraintEnd_toEndOf="parent" />
+    </LinearLayout>
 
-            <SeekBar
-                android:id="@+id/seekBar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:progressTint="@color/color_accent"
-                android:thumbTint="@color/color_accent"
-                app:layout_constraintTop_toBottomOf="@id/nowPlayingAlbumArt"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.cardview.widget.CardView>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+         android:layout_height="wrap_content"
+         android:layout_width="0dp"
+         android:background="#1A1A1A"
+         app:itemTextColor="@color/bottom_nav_color_selector"
+         app:menu="@menu/bottom_navigation_menu"
+         app:itemIconTint="@color/bottom_nav_color_selector"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintBottom_toBottomOf="parent"
+         android:id="@+id/bottom_navigation" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

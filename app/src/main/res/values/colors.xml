@@ -3,9 +3,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="dark_background">#121212</color>
-    <color name="dark_surface">#1E1E1E</color>
-    <color name="dark_primary_text">#E0E0E0</color>
-    <color name="dark_secondary_text">#A0A0A0</color>
-    <color name="color_accent">#BB86FC</color>
+    <color name="dark_background">#FF000000</color> <color name="dark_surface">#1A1A1A</color> <color name="dark_surface_light">#2C2C2C</color> <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#AAAAAA</color>
+    <color name="accent_blue">#00BCD4</color> <color name="accent_purple">#BB86FC</color> <color name="accent_green">#03DAC5</color> <color name="dark_primary_text">@color/text_primary</color>
+    <color name="dark_secondary_text">@color/text_secondary</color>
+    <color name="color_accent">@color/accent_blue</color>
 </resources>

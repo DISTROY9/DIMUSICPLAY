@@ -1,50 +1,35 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/MusicPlayer.kt",
+      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/res/color/bottom_nav_color_selector.xml",
       "selection": {
         "end": {
           "column": 0,
-          "index": 4483,
-          "line": 139
+          "index": 247,
+          "line": 5
         },
         "start": {
           "column": 0,
-          "index": 4483,
-          "line": 139
+          "index": 247,
+          "line": 5
         }
       }
     },
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/MainActivity.kt",
+      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/res/values/colors.xml",
       "selection": {
         "end": {
-          "column": 0,
-          "index": 8276,
-          "line": 205
+          "column": 34,
+          "index": 170,
+          "line": 5
         },
         "start": {
-          "column": 0,
-          "index": 8276,
-          "line": 205
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/NowPlayingActivity.kt",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 4824,
-          "line": 142
-        },
-        "start": {
-          "column": 0,
-          "index": 4824,
-          "line": 142
+          "column": 34,
+          "index": 170,
+          "line": 5
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/MainActivity.kt"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/res/values/colors.xml"
 }
