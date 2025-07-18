@@ -5,58 +5,13 @@
       "selection": {
         "end": {
           "column": 0,
-          "index": 9326,
-          "line": 238
+          "index": 9013,
+          "line": 235
         },
         "start": {
           "column": 0,
-          "index": 9326,
-          "line": 238
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/SongAdapter.kt",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 1831,
-          "line": 47
-        },
-        "start": {
-          "column": 0,
-          "index": 1831,
-          "line": 47
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/res/layout/song_item.xml",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 2143,
-          "line": 49
-        },
-        "start": {
-          "column": 0,
-          "index": 2143,
-          "line": 49
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/AndroidManifest.xml",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 1677,
-          "line": 38
-        },
-        "start": {
-          "column": 0,
-          "index": 1677,
-          "line": 38
+          "index": 9013,
+          "line": 235
         }
       }
     }

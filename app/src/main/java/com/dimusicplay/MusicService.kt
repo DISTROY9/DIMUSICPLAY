@@ -45,8 +45,6 @@ class MusicService : MediaSessionService() {
 
         musicRepository = MusicRepository(applicationContext)
         allSongs = musicRepository.getAllAudioFiles()
-        // Acceso a la instancia de MainApplication a través de 'application' (propiedad de Service).
-        // Si el cast a MainApplication falla, se usará 'null' y no crashearás.
         (application as? MainApplication)?.allSongsInService = allSongs // Compartir la lista de canciones
 
         val audioAttributes = AudioAttributes.Builder()
@@ -85,6 +83,7 @@ class MusicService : MediaSessionService() {
                 updateNotification()
             }
 
+            // *** CORRECCIÓN CRÍTICA AQUÍ: ELIMINAR EL 'fun' DUPLICADO ***
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 updateNotification()
             }
@@ -125,11 +124,9 @@ class MusicService : MediaSessionService() {
 
     private fun createNotification(): Notification {
         val currentMediaItem = exoPlayer.currentMediaItem
-        // ¡ÚLTIMA CORRECCIÓN PARA ESTE ERROR!
-        // Acceder a la instancia de MainApplication a través de 'application' que es una propiedad del Service
-        val mainAppInstance = application as? MainApplication // Usar 'as?' para un cast seguro
+        val mainApplicationInstance = application as MainApplication
         val song = if (currentMediaItem != null) {
-            mainAppInstance?.allSongsInService?.find { it.data == currentMediaItem.mediaId } // Acceder de forma segura
+            mainApplicationInstance.allSongsInService.find { it.data == currentMediaItem.mediaId }
         } else {
             null
         }
