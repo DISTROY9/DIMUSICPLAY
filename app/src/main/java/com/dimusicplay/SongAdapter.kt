@@ -10,39 +10,38 @@ import com.bumptech.glide.Glide
 
 class SongAdapter(
     private val songs: List<Song>,
-    // La función ahora recibe la canción Y la vista de la carátula
-    private val onItemClicked: (Song, View) -> Unit 
+    private val onSongClickListener: (Song) -> Unit
 ) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
-
-    class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val titleTextView: TextView = itemView.findViewById(R.id.songTitleTextView)
-        val artistTextView: TextView = itemView.findViewById(R.id.songArtistTextView)
-        val albumArtImageView: ImageView = itemView.findViewById(R.id.albumArtImageView)
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.song_item, parent, false)
         return SongViewHolder(view)
     }
 
-    override fun getItemCount(): Int {
-        return songs.size
-    }
-
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
         val song = songs[position]
-        holder.titleTextView.text = song.title
-        holder.artistTextView.text = song.artist
-
-        Glide.with(holder.itemView.context)
-            .load(song.albumArtUri)
-            .placeholder(R.mipmap.ic_launcher)
-            .error(R.mipmap.ic_launcher)
-            .into(holder.albumArtImageView)
-
+        holder.bind(song)
         holder.itemView.setOnClickListener {
-            // Pasamos la vista de la carátula junto con la canción
-            onItemClicked(song, holder.albumArtImageView)
+            onSongClickListener(song)
+        }
+    }
+
+    override fun getItemCount(): Int = songs.size
+
+    inner class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val titleTextView: TextView = itemView.findViewById(R.id.songTitleTextView)
+        private val artistTextView: TextView = itemView.findViewById(R.id.songArtistTextView)
+        // Corrección para songAlbumArtImageView
+        private val albumArtImageView: ImageView = itemView.findViewById(R.id.songAlbumArtImageView) // Asumo que este es el ID en song_item.xml
+
+        fun bind(song: Song) {
+            titleTextView.text = song.title
+            artistTextView.text = song.artist
+            Glide.with(itemView.context)
+                .load(song.albumArtUri)
+                .placeholder(R.drawable.ic_launcher_background)
+                .error(R.drawable.ic_launcher_background)
+                .into(albumArtImageView) // Usar el nombre correcto de la variable
         }
     }
 }

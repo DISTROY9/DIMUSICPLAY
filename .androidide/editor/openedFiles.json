@@ -1,35 +1,65 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/res/color/bottom_nav_color_selector.xml",
+      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/MusicService.kt",
       "selection": {
         "end": {
           "column": 0,
-          "index": 247,
-          "line": 5
+          "index": 9326,
+          "line": 238
         },
         "start": {
           "column": 0,
-          "index": 247,
-          "line": 5
+          "index": 9326,
+          "line": 238
         }
       }
     },
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/res/values/colors.xml",
+      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/SongAdapter.kt",
       "selection": {
         "end": {
-          "column": 34,
-          "index": 170,
-          "line": 5
+          "column": 0,
+          "index": 1831,
+          "line": 47
         },
         "start": {
-          "column": 34,
-          "index": 170,
-          "line": 5
+          "column": 0,
+          "index": 1831,
+          "line": 47
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/res/layout/song_item.xml",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 2143,
+          "line": 49
+        },
+        "start": {
+          "column": 0,
+          "index": 2143,
+          "line": 49
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/AndroidManifest.xml",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 1677,
+          "line": 38
+        },
+        "start": {
+          "column": 0,
+          "index": 1677,
+          "line": 38
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/res/values/colors.xml"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/DIMUSICPLAY/app/src/main/java/com/dimusicplay/MusicService.kt"
 }

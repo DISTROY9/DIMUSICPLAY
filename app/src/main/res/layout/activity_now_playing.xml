@@ -21,18 +21,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_percent="0.8" />
-        
-    <com.gauravk.audiovisualizer.visualizer.BlastVisualizer
-        android:id="@+id/blastVisualizer"
-        android:layout_width="0dp"
-        android:layout_height="80dp"
-        app:avColor="@color/color_accent"
-        app:avDensity="0.6"
-        app:avSpeed="medium"
-        app:layout_constraintTop_toBottomOf="@id/albumArtImageViewLarge"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
 
     <TextView
         android:id="@+id/nowPlayingTitleLarge"
@@ -42,10 +30,9 @@
         android:textSize="22sp"
         android:textStyle="bold"
         android:fontFamily="@font/russo_one_regular"
-        android:textColor="@color/dark_primary_text"
+        android:textColor="@color/text_primary"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/blastVisualizer"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/albumArtImageViewLarge" app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
@@ -54,7 +41,7 @@
         android:layout_height="wrap_content"
         android:text="Artista"
         android:textSize="18sp"
-        android:textColor="@color/dark_secondary_text"
+        android:textColor="@color/text_secondary"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/nowPlayingTitleLarge"
         app:layout_constraintStart_toStartOf="parent"
@@ -65,8 +52,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:progressTint="@color/color_accent"
-        android:thumbTint="@color/color_accent"
+        android:progressTint="@color/accent_blue"
+        android:thumbTint="@color/accent_blue"
         app:layout_constraintTop_toBottomOf="@id/nowPlayingArtistLarge"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -87,7 +74,7 @@
             android:layout_height="64dp"
             android:src="@drawable/ic_previous"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/dark_primary_text"
+            app:tint="@color/text_primary"
             android:scaleType="fitCenter"/>
 
         <ImageButton
@@ -96,7 +83,7 @@
             android:layout_height="72dp"
             android:src="@drawable/ic_play"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/dark_primary_text"
+            app:tint="@color/text_primary"
             android:scaleType="fitCenter"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"/>
@@ -107,7 +94,7 @@
             android:layout_height="64dp"
             android:src="@drawable/ic_next"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/dark_primary_text"
+            app:tint="@color/text_primary"
             android:scaleType="fitCenter"/>
     </LinearLayout>
 
